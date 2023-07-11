@@ -57,6 +57,13 @@ const App = () => {
           setMessage({ message: "" })
         }, 5000)
       })
+      .catch(error => {
+        console.log(error.response.data)
+        setMessage({ message: error.response.data.error, type: "error" })
+        setTimeout(() => {
+          setMessage({ message: "" })
+        }, 5000)
+      })
     }
   }
 
@@ -99,5 +106,7 @@ const App = () => {
 }
 
 export default App
+
+
 
 
