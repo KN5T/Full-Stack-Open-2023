@@ -1,0 +1,10 @@
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IktONVQiLCJpZCI6IjY0YTk2NDU3NTM5M2M5OThhMzdjM2IyMCIsImlhdCI6MTY4ODg1OTU5OH0.BMIcvCjXf6wnpNozpJk9DGW5LNTVDsMjoNQC8tjlpQk
+
+{
+  "title": "Testi numero 2",
+  "author": "Ei tietioa",
+  "url": "https://fi.wikipedia.org/wiki/Blogi",
+  "likes": 1
+}
