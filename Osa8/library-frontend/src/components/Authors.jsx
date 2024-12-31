@@ -3,17 +3,20 @@ import { ALL_AUTHORS } from "../queries"
 import SetBirthyear from "./SetBirthyear"
 
 const Authors = ({ show, token }) => {
-  const result = useQuery(ALL_AUTHORS)
+  const {loading, error, data} = useQuery(ALL_AUTHORS)
 
   if (!show) {
     return null
   }
 
-  if (result.loading) {
+  if (loading) {
     return <div>loading...</div>
   }
+  if(error) {
+    return <div>can not load authors</div>
+  } 
 
-  const authors = result.data.allAuthors
+  const authors = data.allAuthors
 
   return (
     <div>

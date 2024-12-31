@@ -1,8 +1,8 @@
 import { useMutation } from "@apollo/client"
 import { useEffect, useState } from "react"
-import { LOGIN } from "../queries"
+import { LOGIN, USER } from "../queries"
 
-const LoginForm = ({ show, setPage, setToken, refetchUserData }) => {
+const LoginForm = ({ show, setPage, setToken, setUser }) => {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [login, result] = useMutation(LOGIN)
@@ -15,7 +15,6 @@ const LoginForm = ({ show, setPage, setToken, refetchUserData }) => {
       localStorage.setItem("bookApp-user-token", token)
       setUsername("")
       setPassword("")
-      refetchUserData()
     }
   }, [result.data])
 

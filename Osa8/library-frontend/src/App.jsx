@@ -1,36 +1,56 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Authors from "./components/Authors"
 import Books from "./components/Books"
 import NewBook from "./components/NewBook"
 import LoginForm from "./components/LoginForm"
 import { useApolloClient, useQuery, useSubscription } from "@apollo/client"
 import Recommendations from "./components/Recommendations"
-import { ALL_BOOKS, BOOK_ADDED, FAVORITE_GENRE } from "./queries"
+import { BOOK_ADDED, USER, ALL_BOOKS } from "./queries"
+
+export const updateCache = (cache, query, addedBook) => {
+  const uniqueByTitle = (a) => {
+    let seen = new Set()
+    return a.filter(book => {
+      let title = book.title
+      return seen.has(title) ? false : seen.add(title)
+    })
+  }
+
+  cache.updateQuery(query, (data) => {
+    if(data && data.allBooks) {
+      return {
+        allBooks: uniqueByTitle(data.allBooks.concat(addedBook))  
+      }
+    }
+  })
+}
 
 const App = () => {
   const [page, setPage] = useState("authors")
+  const [genre, setGenre] = useState(null)
   const [token, setToken] = useState(null)
   const client = useApolloClient()
-  const books = useQuery(ALL_BOOKS)
-  const favoriteResult = useQuery(FAVORITE_GENRE)
+  const result = useQuery(USER)
+
+  useEffect(() => {
+    if(token) {
+      result.refetch()
+    }
+  }, [token])
 
   useSubscription(BOOK_ADDED, {
     onData: ({ data }) => {
       if (data) {
-        console.log("data")
-        const { title, author } = data.data.bookAdded
-        window.alert(`Book "${title}" by ${author.name} added`)
-        /*
-        client.cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-          return {
-            allBooks: allBooks.concat(data.data.bookAdded),
-          }
-        })*/
+        const addedBook = data.data.bookAdded
+        window.alert(`Book "${addedBook.title}" by ${addedBook.author.name} added`)
+        updateCache(client.cache, {query: ALL_BOOKS, variables: {genre}}, addedBook)
       }
     },
   })
 
-  if (favoriteResult.loading || books.loading) return <div>loading...</div>
+  if(result.loading) return <div>loading...</div>
+
+  const user = result.data.me
 
   const handleLogout = () => {
     setToken(null)
@@ -58,24 +78,19 @@ const App = () => {
 
       <Books
         show={page === "books"}
-        refetchBooks={books.refetch}
-        books={books.data.allBooks}
+        setGenre={setGenre}
+        genre={genre}
       />
 
-      <NewBook show={page === "add"} />
+      <NewBook show={page === "add"} currentGenre={genre} />
 
-      <Recommendations
-        show={page === "recommend" && token}
-        favoriteGenre={
-          !favoriteResult.data ? null : favoriteResult.data.favoriteGenre
-        }
-      />
+      <Recommendations show={page === "recommend"} favoriteGenre={user?.favoriteGenre
+      } />
 
       <LoginForm
         show={page === "login"}
         setPage={setPage}
         setToken={setToken}
-        refetchUserData={favoriteResult.refetch}
       />
     </div>
   )

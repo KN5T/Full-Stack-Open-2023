@@ -1,17 +1,13 @@
 import { useQuery } from "@apollo/client"
 import BooksTable from "./BooksTable"
-import { RECOMMENDED_BOOKS } from "../queries"
+import { FAVORITE_GENRE, RECOMMENDED_BOOKS } from "../queries"
 import { useEffect, useState } from "react"
 
-const Recommendations = ({ show, favoriteGenre }) => {
+const Recommendations = ({ show, favoriteGenre }) => {  
   const result = useQuery(RECOMMENDED_BOOKS, {
     variables: { genre: favoriteGenre },
   })
-  /*
-  useEffect(() => {
-    result.refetch()
-  }, [show])
-*/
+
   if (!show) {
     return null
   }

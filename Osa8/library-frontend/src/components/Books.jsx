@@ -1,22 +1,26 @@
 
 import Genres from "./Genres"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import BooksTable from "./BooksTable"
+import { useQuery } from "@apollo/client"
+import { ALL_BOOKS } from "../queries"
 
-const Books = ({ show, refetchBooks, books }) => {
-  const [genre, setGenre] = useState(null)
+const Books = ({ show, setGenre, genre }) => {
+
+  const {loading, error, data, refetch} = useQuery(ALL_BOOKS, {variables: {genre}})
 
   useEffect(() => {
-    refetchBooks()
-  }, [show])
-
-  useEffect(() => {
-    refetchBooks({ genre })
+    refetch({genre})
   }, [genre])
 
   if (!show) {
     return null
   }
+
+  if(loading) return <div>...loading</div>
+  if(error) return <div>can not load books</div>
+
+  const books = data.allBooks
 
   return (
     <div>

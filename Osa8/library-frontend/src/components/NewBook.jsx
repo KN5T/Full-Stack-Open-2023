@@ -1,38 +1,38 @@
 import { useMutation } from "@apollo/client"
 import { useState } from "react"
+import { updateCache } from "../App"
 import {
   ALL_AUTHORS,
   ALL_BOOKS,
   ALL_GENRES,
   CREATE_BOOK,
-  FAVORITE_GENRE,
   RECOMMENDED_BOOKS,
 } from "../queries"
 
-const NewBook = (props) => {
+const NewBook = ({ show, currentGenre }) => {
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
   const [published, setPublished] = useState("")
   const [genre, setGenre] = useState("")
-  const [genres, setGenres] = useState([])
+  const [genres, setGenres] = useState([])    
 
   const [createBook] = useMutation(CREATE_BOOK, {
-    refetchQueries: [
-      { query: ALL_AUTHORS },
-      { query: ALL_GENRES },
-      { query: FAVORITE_GENRE },
-      { query: RECOMMENDED_BOOKS },
-    ],
-    update: (cache, response) => {
-      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+   refetchQueries: [ALL_AUTHORS, RECOMMENDED_BOOKS],
+   update: (cache, response) => {
+    cache.updateQuery({query: ALL_GENRES}, (data) => {
+
+      if(data && data.allGenres) {
+        const newGenres = genres.filter(g => !data.allGenres.includes(g))
         return {
-          allBooks: allBooks.concat(response.data.addBook),
+          allGenres: data.allGenres.concat(newGenres) 
         }
-      })
-    },
+      }
+    })
+    updateCache(cache, { query: ALL_BOOKS, variables: {genre: currentGenre} }, response.data.addBook)
+   }
   })
 
-  if (!props.show) {
+  if (!show) {
     return null
   }
 
@@ -54,6 +54,7 @@ const NewBook = (props) => {
 
   return (
     <div>
+      <h2>add a new book</h2>
       <form onSubmit={submit}>
         <div>
           title
